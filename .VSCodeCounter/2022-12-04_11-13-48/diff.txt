@@ -1,0 +1,57 @@
+Date : 2022-12-04 11:13:48
+Directory : d:\data_dapin_program
+Total : 18 files,  2814 codes, 1169 comments, 286 blanks, all 4269 lines
+
+Languages
++----------------------+------------+------------+------------+------------+------------+
+| language             | files      | code       | comment    | blank      | total      |
++----------------------+------------+------------+------------+------------+------------+
+| Oracle-SQL and PLSQL |         17 |      2,813 |      1,169 |        285 |      4,267 |
+| Markdown             |          1 |          1 |          0 |          1 |          2 |
++----------------------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                       | files      | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                          |         18 |      2,814 |      1,169 |        286 |      4,269 |
+| .history                                                                                                   |         12 |      4,086 |        984 |        302 |      5,372 |
+| .history\PKG_ITEM_COUNT_BILI                                                                               |          2 |         72 |         26 |         10 |        108 |
+| .history\PKG_ITEM_COUNT_BILI\BODY                                                                          |          2 |         72 |         26 |         10 |        108 |
+| .history\PKG_ITEM_COUNT_FAC                                                                                |          1 |        987 |         66 |         14 |      1,067 |
+| .history\PKG_ITEM_COUNT_FAC\BODY                                                                           |          1 |        987 |         66 |         14 |      1,067 |
+| .history\PKG_ITEM_COUNT_PROCESS                                                                            |          3 |        849 |        620 |         12 |      1,481 |
+| .history\PKG_ITEM_COUNT_PROCESS\BODY                                                                       |          3 |        849 |        620 |         12 |      1,481 |
+| .history\PKG_ITEM_COUNT_TOOL                                                                               |          4 |        830 |        132 |        178 |      1,140 |
+| .history\PKG_ITEM_COUNT_TOOL\BODY                                                                          |          2 |        776 |        126 |        170 |      1,072 |
+| .history\PKG_ITEM_COUNT_TOOL\SPECIFICATIONS                                                                |          2 |         54 |          6 |          8 |         68 |
+| .history\PKG_ITEM_COUNT_ZCFZ                                                                               |          2 |      1,348 |        140 |         88 |      1,576 |
+| .history\PKG_ITEM_COUNT_ZCFZ\BODY                                                                          |          2 |      1,348 |        140 |         88 |      1,576 |
+| PKG_ITEM_COUNT_PROCESS                                                                                     |          1 |       -267 |        268 |          0 |          1 |
+| PKG_ITEM_COUNT_PROCESS\BODY                                                                                |          1 |       -267 |        268 |          0 |          1 |
++------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------------------------------------------------------------+----------------------+------------+------------+------------+------------+
+| filename                                                                                                   | language             | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------------------+----------------------+------------+------------+------------+------------+
+| d:\data_dapin_program\.history\PKG_ITEM_COUNT_BILI\BODY\PKG_ITEM_COUNT_BILI_20221129165809.plsql           | Oracle-SQL and PLSQL |         36 |         13 |          5 |         54 |
+| d:\data_dapin_program\.history\PKG_ITEM_COUNT_BILI\BODY\PKG_ITEM_COUNT_BILI_20221204102604.plsql           | Oracle-SQL and PLSQL |         36 |         13 |          5 |         54 |
+| d:\data_dapin_program\.history\PKG_ITEM_COUNT_FAC\BODY\PKG_ITEM_COUNT_FAC_20221204110938.sql               | Oracle-SQL and PLSQL |        987 |         66 |         14 |      1,067 |
+| d:\data_dapin_program\.history\PKG_ITEM_COUNT_PROCESS\BODY\PKG_ITEM_COUNT_PROCESS_20221129165721.plsql     | Oracle-SQL and PLSQL |        461 |         28 |          4 |        493 |
+| d:\data_dapin_program\.history\PKG_ITEM_COUNT_PROCESS\BODY\PKG_ITEM_COUNT_PROCESS_20221204105854.plsql     | Oracle-SQL and PLSQL |        194 |        296 |          4 |        494 |
+| d:\data_dapin_program\.history\PKG_ITEM_COUNT_PROCESS\BODY\PKG_ITEM_COUNT_PROCESS_20221204105916.plsql     | Oracle-SQL and PLSQL |        194 |        296 |          4 |        494 |
+| d:\data_dapin_program\.history\PKG_ITEM_COUNT_TOOL\BODY\PKG_ITEM_COUNT_TOOL_20221129161601.plsql           | Oracle-SQL and PLSQL |        388 |         63 |         85 |        536 |
+| d:\data_dapin_program\.history\PKG_ITEM_COUNT_TOOL\BODY\PKG_ITEM_COUNT_TOOL_20221204110207.plsql           | Oracle-SQL and PLSQL |        388 |         63 |         85 |        536 |
+| d:\data_dapin_program\.history\PKG_ITEM_COUNT_TOOL\SPECIFICATIONS\PKG_ITEM_COUNT_TOOL_20221129161551.plsql | Oracle-SQL and PLSQL |         27 |          3 |          4 |         34 |
+| d:\data_dapin_program\.history\PKG_ITEM_COUNT_TOOL\SPECIFICATIONS\PKG_ITEM_COUNT_TOOL_20221204110240.plsql | Oracle-SQL and PLSQL |         27 |          3 |          4 |         34 |
+| d:\data_dapin_program\.history\PKG_ITEM_COUNT_ZCFZ\BODY\PKG_ITEM_COUNT_ZCFZ_20221129160429.plsql           | Oracle-SQL and PLSQL |        674 |         70 |         44 |        788 |
+| d:\data_dapin_program\.history\PKG_ITEM_COUNT_ZCFZ\BODY\PKG_ITEM_COUNT_ZCFZ_20221204110701.plsql           | Oracle-SQL and PLSQL |        674 |         70 |         44 |        788 |
+| d:\data_dapin_program\PKG_ITEM_COUNT_PROCESS\BODY\PKG_ITEM_COUNT_PROCESS.plsql                             | Oracle-SQL and PLSQL |       -267 |        268 |          0 |          1 |
+| d:\data_dapin_program\README.md                                                                            | Markdown             |          1 |          0 |          1 |          2 |
+| d:\data_dapin_program\执行流程.sql                                                                             | Oracle-SQL and PLSQL |        -24 |        -17 |         -4 |        -45 |
+| d:\data_dapin_program\折算以及币种维度汇总.sql                                                                       | Oracle-SQL and PLSQL |       -316 |        -47 |         -8 |       -371 |
+| d:\data_dapin_program\机构科目汇总.sql                                                                           | Oracle-SQL and PLSQL |       -357 |         -7 |         -2 |       -366 |
+| d:\data_dapin_program\计税.sql                                                                               | Oracle-SQL and PLSQL |       -309 |        -12 |         -3 |       -324 |
+| Total                                                                                                      |                      |      2,814 |      1,169 |        286 |      4,269 |
++------------------------------------------------------------------------------------------------------------+----------------------+------------+------------+------------+------------+
