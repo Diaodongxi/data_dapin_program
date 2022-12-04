@@ -1,0 +1,84 @@
+Date : 2022-12-03 23:33:02
+Directory : d:\data_dapin_program
+Total : 38 files,  10211 codes, 918 comments, 451 blanks, all 11580 lines
+
+Languages
++----------------------+------------+------------+------------+------------+------------+
+| language             | files      | code       | comment    | blank      | total      |
++----------------------+------------+------------+------------+------------+------------+
+| Oracle-SQL and PLSQL |         38 |     10,211 |        918 |        451 |     11,580 |
++----------------------+------------+------------+------------+------------+------------+
+
+Directories
++--------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                   | files      | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                      |         38 |     10,211 |        918 |        451 |     11,580 |
+| .history                                                                                               |         21 |      5,920 |        368 |         87 |      6,375 |
+| .history\PKG_ITEM_COUNT_FAC                                                                            |          6 |      2,963 |        201 |         47 |      3,211 |
+| .history\PKG_ITEM_COUNT_FAC\BODY                                                                       |          4 |      2,957 |        198 |         43 |      3,198 |
+| .history\PKG_ITEM_COUNT_FAC\SPECIFICATIONS                                                             |          2 |          6 |          3 |          4 |         13 |
+| FTP                                                                                                    |          2 |        663 |        193 |        168 |      1,024 |
+| FTP\BODY                                                                                               |          1 |        550 |        169 |        138 |        857 |
+| FTP\SPECIFICATIONS                                                                                     |          1 |        113 |         24 |         30 |        167 |
+| PKG_ITEM_COUNT_BILI                                                                                    |          2 |         39 |         16 |          9 |         64 |
+| PKG_ITEM_COUNT_BILI\BODY                                                                               |          1 |         36 |         13 |          5 |         54 |
+| PKG_ITEM_COUNT_BILI\SPECIFICATIONS                                                                     |          1 |          3 |          3 |          4 |         10 |
+| PKG_ITEM_COUNT_FAC                                                                                     |          2 |        993 |         69 |         17 |      1,079 |
+| PKG_ITEM_COUNT_FAC\BODY                                                                                |          1 |        987 |         66 |         14 |      1,067 |
+| PKG_ITEM_COUNT_FAC\SPECIFICATIONS                                                                      |          1 |          6 |          3 |          3 |         12 |
+| PKG_ITEM_COUNT_PROCESS                                                                                 |          2 |        469 |         31 |          8 |        508 |
+| PKG_ITEM_COUNT_PROCESS\BODY                                                                            |          1 |        461 |         28 |          4 |        493 |
+| PKG_ITEM_COUNT_PROCESS\SPECIFICATIONS                                                                  |          1 |          8 |          3 |          4 |         15 |
+| PKG_ITEM_COUNT_TOOL                                                                                    |          2 |        415 |         66 |         89 |        570 |
+| PKG_ITEM_COUNT_TOOL\BODY                                                                               |          1 |        388 |         63 |         85 |        536 |
+| PKG_ITEM_COUNT_TOOL\SPECIFICATIONS                                                                     |          1 |         27 |          3 |          4 |         34 |
+| PKG_ITEM_COUNT_ZCFZ                                                                                    |          2 |        692 |         73 |         48 |        813 |
+| PKG_ITEM_COUNT_ZCFZ\BODY                                                                               |          1 |        674 |         70 |         44 |        788 |
+| PKG_ITEM_COUNT_ZCFZ\SPECIFICATIONS                                                                     |          1 |         18 |          3 |          4 |         25 |
++--------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++--------------------------------------------------------------------------------------------------------+----------------------+------------+------------+------------+------------+
+| filename                                                                                               | language             | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------------------------+----------------------+------------+------------+------------+------------+
+| d:\data_dapin_program\.history\PKG_ITEM_COUNT_FAC\BODY\PKG_ITEM_COUNT_FAC_20221203170513.sql           | Oracle-SQL and PLSQL |          0 |          0 |          1 |          1 |
+| d:\data_dapin_program\.history\PKG_ITEM_COUNT_FAC\BODY\PKG_ITEM_COUNT_FAC_20221203171930.sql           | Oracle-SQL and PLSQL |        985 |         66 |         14 |      1,065 |
+| d:\data_dapin_program\.history\PKG_ITEM_COUNT_FAC\BODY\PKG_ITEM_COUNT_FAC_20221203172557.sql           | Oracle-SQL and PLSQL |        985 |         66 |         14 |      1,065 |
+| d:\data_dapin_program\.history\PKG_ITEM_COUNT_FAC\BODY\PKG_ITEM_COUNT_FAC_20221203173008.sql           | Oracle-SQL and PLSQL |        987 |         66 |         14 |      1,067 |
+| d:\data_dapin_program\.history\PKG_ITEM_COUNT_FAC\SPECIFICATIONS\PKG_ITEM_COUNT_FAC_20221203172030.sql | Oracle-SQL and PLSQL |          0 |          0 |          1 |          1 |
+| d:\data_dapin_program\.history\PKG_ITEM_COUNT_FAC\SPECIFICATIONS\PKG_ITEM_COUNT_FAC_20221203172553.sql | Oracle-SQL and PLSQL |          6 |          3 |          3 |         12 |
+| d:\data_dapin_program\.history\PROCESS_20221203172638.sql                                              | Oracle-SQL and PLSQL |          0 |          0 |          1 |          1 |
+| d:\data_dapin_program\.history\PROCESS_20221203173011.sql                                              | Oracle-SQL and PLSQL |          4 |          0 |          0 |          4 |
+| d:\data_dapin_program\.history\PROCESS_20221203173158.sql                                              | Oracle-SQL and PLSQL |          6 |          0 |          1 |          7 |
+| d:\data_dapin_program\.history\PROCESS_20221203173240.sql                                              | Oracle-SQL and PLSQL |          7 |          0 |          1 |          8 |
+| d:\data_dapin_program\.history\PROCESS_20221203230211.sql                                              | Oracle-SQL and PLSQL |          7 |          0 |          1 |          8 |
+| d:\data_dapin_program\.history\PROCESS_20221203232819.sql                                              | Oracle-SQL and PLSQL |         14 |         19 |          8 |         41 |
+| d:\data_dapin_program\.history\折算以及币种维度汇总_20221202174751.sql                                           | Oracle-SQL and PLSQL |        297 |         31 |          6 |        334 |
+| d:\data_dapin_program\.history\折算以及币种维度汇总_20221203155137.sql                                           | Oracle-SQL and PLSQL |        309 |         34 |          5 |        348 |
+| d:\data_dapin_program\.history\折算以及币种维度汇总_20221203163633.sql                                           | Oracle-SQL and PLSQL |        316 |         47 |          8 |        371 |
+| d:\data_dapin_program\.history\机构科目汇总_20221202174751.sql                                               | Oracle-SQL and PLSQL |        355 |          5 |          0 |        360 |
+| d:\data_dapin_program\.history\机构科目汇总_20221203155141.sql                                               | Oracle-SQL and PLSQL |        358 |          2 |          0 |        360 |
+| d:\data_dapin_program\.history\机构科目汇总_20221203170251.sql                                               | Oracle-SQL and PLSQL |        357 |          7 |          2 |        366 |
+| d:\data_dapin_program\.history\计税_20221202174755.sql                                                   | Oracle-SQL and PLSQL |        309 |          5 |          2 |        316 |
+| d:\data_dapin_program\.history\计税_20221203155139.sql                                                   | Oracle-SQL and PLSQL |        309 |          5 |          2 |        316 |
+| d:\data_dapin_program\.history\计税_20221203163630.sql                                                   | Oracle-SQL and PLSQL |        309 |         12 |          3 |        324 |
+| d:\data_dapin_program\FTP\BODY\FTP.plsql                                                               | Oracle-SQL and PLSQL |        550 |        169 |        138 |        857 |
+| d:\data_dapin_program\FTP\SPECIFICATIONS\FTP.plsql                                                     | Oracle-SQL and PLSQL |        113 |         24 |         30 |        167 |
+| d:\data_dapin_program\PKG_ITEM_COUNT_BILI\BODY\PKG_ITEM_COUNT_BILI.plsql                               | Oracle-SQL and PLSQL |         36 |         13 |          5 |         54 |
+| d:\data_dapin_program\PKG_ITEM_COUNT_BILI\SPECIFICATIONS\PKG_ITEM_COUNT_BILI.plsql                     | Oracle-SQL and PLSQL |          3 |          3 |          4 |         10 |
+| d:\data_dapin_program\PKG_ITEM_COUNT_FAC\BODY\PKG_ITEM_COUNT_FAC.sql                                   | Oracle-SQL and PLSQL |        987 |         66 |         14 |      1,067 |
+| d:\data_dapin_program\PKG_ITEM_COUNT_FAC\SPECIFICATIONS\PKG_ITEM_COUNT_FAC.sql                         | Oracle-SQL and PLSQL |          6 |          3 |          3 |         12 |
+| d:\data_dapin_program\PKG_ITEM_COUNT_PROCESS\BODY\PKG_ITEM_COUNT_PROCESS.plsql                         | Oracle-SQL and PLSQL |        461 |         28 |          4 |        493 |
+| d:\data_dapin_program\PKG_ITEM_COUNT_PROCESS\SPECIFICATIONS\PKG_ITEM_COUNT_PROCESS.plsql               | Oracle-SQL and PLSQL |          8 |          3 |          4 |         15 |
+| d:\data_dapin_program\PKG_ITEM_COUNT_TOOL\BODY\PKG_ITEM_COUNT_TOOL.plsql                               | Oracle-SQL and PLSQL |        388 |         63 |         85 |        536 |
+| d:\data_dapin_program\PKG_ITEM_COUNT_TOOL\SPECIFICATIONS\PKG_ITEM_COUNT_TOOL.plsql                     | Oracle-SQL and PLSQL |         27 |          3 |          4 |         34 |
+| d:\data_dapin_program\PKG_ITEM_COUNT_ZCFZ\BODY\PKG_ITEM_COUNT_ZCFZ.plsql                               | Oracle-SQL and PLSQL |        674 |         70 |         44 |        788 |
+| d:\data_dapin_program\PKG_ITEM_COUNT_ZCFZ\SPECIFICATIONS\PKG_ITEM_COUNT_ZCFZ.plsql                     | Oracle-SQL and PLSQL |         18 |          3 |          4 |         25 |
+| d:\data_dapin_program\PROCESS.sql                                                                      | Oracle-SQL and PLSQL |         14 |         19 |          8 |         41 |
+| d:\data_dapin_program\执行流程.sql                                                                         | Oracle-SQL and PLSQL |         24 |         17 |          4 |         45 |
+| d:\data_dapin_program\折算以及币种维度汇总.sql                                                                   | Oracle-SQL and PLSQL |        316 |         47 |          8 |        371 |
+| d:\data_dapin_program\机构科目汇总.sql                                                                       | Oracle-SQL and PLSQL |        357 |          7 |          2 |        366 |
+| d:\data_dapin_program\计税.sql                                                                           | Oracle-SQL and PLSQL |        309 |         12 |          3 |        324 |
+| Total                                                                                                  |                      |     10,211 |        918 |        451 |     11,580 |
++--------------------------------------------------------------------------------------------------------+----------------------+------------+------------+------------+------------+

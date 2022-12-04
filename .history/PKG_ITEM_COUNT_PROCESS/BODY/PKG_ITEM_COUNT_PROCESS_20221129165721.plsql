@@ -1,6 +1,6 @@
 CREATE OR REPLACE PACKAGE BODY "SUNGL".PKG_ITEM_COUNT_PROCESS IS
   ---------------------------------------------------------------------------------------------------------
-  /*PROCEDURE INSERT_DATA_RJ_BASE IS
+  PROCEDURE INSERT_DATA_RJ_BASE IS
   BEGIN
     INSERT INTO DATA_RJ_BASE
       (SYSTID,
@@ -268,7 +268,7 @@ CREATE OR REPLACE PACKAGE BODY "SUNGL".PKG_ITEM_COUNT_PROCESS IS
                                               601111,
                                               660130));
     COMMIT;
-  END INSERT_DATA_RJ_BASE;*/
+  END INSERT_DATA_RJ_BASE;
   --------------------------------------------------------------------------------------------------------------------------------
   PROCEDURE INSERT_DATA_DAPIN_RESULT IS
     --机构循环取数，插入结果表
@@ -346,7 +346,7 @@ CREATE OR REPLACE PACKAGE BODY "SUNGL".PKG_ITEM_COUNT_PROCESS IS
   
     FOR I IN 1 .. VAR_ARRAY.COUNT LOOP
       I_COL := VAR_ARRAY(I);
-      INSERT INTO SUNGL.DATA_DAPIN_RESLT
+      INSERT INTO DATA_DAPIN_RESLT
       VALUES
         (20221101,  --#FIXME:加上日期参数
          I_COL,
@@ -385,7 +385,6 @@ CREATE OR REPLACE PACKAGE BODY "SUNGL".PKG_ITEM_COUNT_PROCESS IS
          0,
          0,
          0,
-         --!成本收入比需要转换成百分比
          CONCAT(TO_CHAR(SUNGL.PKG_ITEM_COUNT_BILI.COSTINCO(I_COL) * 100,
                         'FM990.99'),
                 '%'),
@@ -457,7 +456,7 @@ CREATE OR REPLACE PACKAGE BODY "SUNGL".PKG_ITEM_COUNT_PROCESS IS
     V_RESULT    VARCHAR2(255) := 0; --定义结果信息
     V_SIGN      NUMBER(4) := 0; --定义结果状态，默认为0
   BEGIN
-    --使用FTP.LOGIN方法创建连接，参数依次为IP/端口/用户名/密码 #TODO:生产上的地址记得配置
+    --使用FTP.LOGIN方法创建连接，参数依次为IP/端口/用户名/密码
     L_CONN := SUNGL.FTP.LOGIN('192.111.29.94', '21', 'ftpusr', 'Ftp@123..');
     BEGIN
       --获取远程文件绝对路径
