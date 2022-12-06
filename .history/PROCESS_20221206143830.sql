@@ -36,7 +36,7 @@ file_name := 'uacp_dapin_data_'||to_char(sysdate,'yyyymmdd')||'.csv';
  */
 
 --价税分离
-sungl.pkg_item_count_fac.tax_count();
+--sungl.pkg_item_count_fac.tax_count();
 --科目机构汇总
 sungl.pkg_item_count_fac.count_brch_item();
 --折算

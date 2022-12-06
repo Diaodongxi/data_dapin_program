@@ -1,32 +1,33 @@
-create or replace package body pkg_item_count_fac is
-
-acct_date varchar2(20);
+CREATE OR REPLACE PACKAGE BODY PKG_ITEM_COUNT_FAC IS
  /**
  * @description: 固定科目价税分离
  */
  ------------------------------------------------***特殊机构计税开始------------------------------------------------------------------------------------------------------
-procedure tax_count is
+PROCEDURE TAX_COUNT IS
 
-begin
-  select distinct (t.acctdt) into acct_date from sungl.gla_glis_h_t02 t order by t.acctdt;
+BEGIN
  /* 
 税率表是财务部提供的，两张不同的税率表，包含普通机构和特殊机构
 计税要从末级数据计，且只有核心来源的部分科目才需要计税
 价税分离后余额 = 原币余额 + 发生额 * 税率
 */
-    update sungl.gla_glis_h_t02 t
-    set
+    UPDATE SUNGL.GLA_GLIS_H_T02 T
+    SET
  --借贷方发生额计税
-        t.crtsam = t.crtsam / (1+(select e.taxrate from sungl.tax_rate_sp e where t.itemcd = e.itemcd)),
-        t.drtsam = t.drtsam / (1+(select e.taxrate from sungl.tax_rate_sp e where t.itemcd = e.itemcd))
-
-    where
-        t.systid = '30101'
-        and t.acctdt = acct_date
-        and t.brchcd in (
-            select b.brchcd from sungl.com_brch b where b.detltg = '1' start with b.brchcd in (901020000, 901060000, 902010000, 903020000, 904020000, 905020000, 906020000, 907020000, 908020000, 909020000) connect by prior b.brchcd = b.sprrcd
+        (
+            T.CRTSAM,
+            T.DRTSAM
+        ) = (
+            T.CRTSAM / (1+(SELECT E.TAXRATE FROM SUNGL.TAX_RATE_SP E WHERE T.ITEMCD = E.ITEMCD)),
+            T.DRTSAM / (1+(SELECT E.TAXRATE FROM SUNGL.TAX_RATE_SP E WHERE T.ITEMCD = E.ITEMCD))
         )
-        and t.itemcd in (
+    WHERE
+        T.SYSTID = '30101'
+        AND T.ACCTDT = 20221101
+        AND T.BRCHCD IN (
+            SELECT B.BRCHCD FROM SUNGL.COM_BRCH B WHERE B.DETLTG = '1' START WITH B.BRCHCD IN (901020000, 901060000, 902010000, 903020000, 904020000, 905020000, 906020000, 907020000, 908020000, 909020000) CONNECT BY PRIOR B.BRCHCD = B.SPRRCD
+        )
+        AND T.ITEMCD IN (
             6011888,
             601107,
             601199,
@@ -165,17 +166,22 @@ begin
             60210404,
             60210406
         );
-    commit;
+    COMMIT;
  ------------------------------------------------***特殊机构计税结束***------------------------------------------------------------------------------------------------------
  -----------------------------------------------***普通机构机构计税开始***------------------------------------------------------------------------------------------------------
-    update sungl.gla_glis_h_t02 t
-    set
-        t.crtsam = t.crtsam / (1+(select e.taxrate from sungl.tax_rate_nm e where t.itemcd = e.itemcd)),
-        t.drtsam = t.drtsam / (1+(select e.taxrate from sungl.tax_rate_nm e where t.itemcd = e.itemcd))
-    where
-        t.systid = '30101'
-        and t.acctdt = acct_date
-        and t.itemcd in (
+    UPDATE SUNGL.GLA_GLIS_H_T02 T
+    SET
+        (
+            T.CRTSAM,
+            T.DRTSAM
+        ) = (
+            T.CRTSAM / (1+(SELECT E.TAXRATE FROM SUNGL.TAX_RATE_NM E WHERE T.ITEMCD = E.ITEMCD)),
+            T.DRTSAM / (1+(SELECT E.TAXRATE FROM SUNGL.TAX_RATE_NM E WHERE T.ITEMCD = E.ITEMCD))
+        )
+    WHERE
+        T.SYSTID = '30101'
+        AND T.ACCTDT = 20221101
+        AND T.ITEMCD IN (
             6011888,
             601107,
             601199,
@@ -314,53 +320,53 @@ begin
             60210404,
             60210406
         )
-        and t.brchcd not in (
-            select b.brchcd from sungl.com_brch b where b.detltg = '1' start with b.brchcd in (901020000, 901060000, 902010000, 903020000, 904020000, 905020000, 906020000, 907020000, 908020000, 909020000) connect by prior b.brchcd = b.sprrcd
+        AND T.BRCHCD NOT IN (
+            SELECT B.BRCHCD FROM SUNGL.COM_BRCH B WHERE B.DETLTG = '1' START WITH B.BRCHCD IN (901020000, 901060000, 902010000, 903020000, 904020000, 905020000, 906020000, 907020000, 908020000, 909020000) CONNECT BY PRIOR B.BRCHCD = B.SPRRCD
         );
-    commit;
+    COMMIT;
  -----------------------------------------------***普通机构机构计税结束***------------------------------------------------------------------------------------------------------
-end tax_count;
+END TAX_COUNT;
 
 
 /**
  * @description: 根据机构、科目维度从末级汇总到一级
  */
 -----------------------------***机构科目汇总开始***------------------------------------------
-procedure count_brch_item is
+PROCEDURE COUNT_BRCH_ITEM IS
 
-begin
-    insert into sungl.gla_glis_count
-        select
+BEGIN
+    INSERT INTO SUNGL.GLA_GLIS_COUNT
+        SELECT
             *
-        from
-            ( with temp2 as (
-                select
-                    temp1.itemcd, -- 科目号
-                    nvl(u.onlnbl,
-                    0)           onlnbl, --原币余额
-                    u.lastbl, --上期原币余额
-                    u.crtsam, --贷方发生额
-                    u.drtsam, --借方发生额
-                    u.dlflcbl, --借方本位币期初余额
-                    u.clflcbl, --贷方本位币期初余额
-                    root_id, --该科目所属的一级科目号
-                    root_name, --该科目所属的一级科目名称
-                    u.brchcd, --机构号
-                    u.crcycd, --币种
-                    u.acctdt, --账务日期
-                    u.blncdn, --科目方向
-                    u.systid --来源系统号
-                from
+        FROM
+            ( WITH TEMP2 AS (
+                SELECT
+                    TEMP1.ITEMCD, -- 科目号
+                    NVL(U.ONLNBL,
+                    0)           ONLNBL, --原币余额
+                    U.LASTBL, --上期原币余额
+                    U.CRTSAM, --贷方发生额
+                    U.DRTSAM, --借方发生额
+                    U.DLFLCBL, --借方本位币期初余额
+                    U.CLFLCBL, --贷方本位币期初余额
+                    ROOT_ID, --该科目所属的一级科目号
+                    ROOT_NAME, --该科目所属的一级科目名称
+                    U.BRCHCD, --机构号
+                    U.CRCYCD, --币种
+                    U.ACCTDT, --账务日期
+                    U.BLNCDN, --科目方向
+                    U.SYSTID --来源系统号
+                FROM
                     ( --根据科目层级，找出指标内需要的科目（有一级，二级...末级）对应的所有的末级科目
-                        select
-                            t.itemcd,
-                            t.itemna,
-                            connect_by_root(t.itemcd) root_id,
-                            connect_by_root(t.itemna) root_name
-                        from
-                            sungl.com_item t
-                        where
-                            t.detltg = '1' start with t.itemcd in (6011,
+                        SELECT
+                            T.ITEMCD,
+                            T.ITEMNA,
+                            CONNECT_BY_ROOT(T.ITEMCD) ROOT_ID,
+                            CONNECT_BY_ROOT(T.ITEMNA) ROOT_NAME
+                        FROM
+                            SUNGL.COM_ITEM T
+                        WHERE
+                            T.DETLTG = '1' START WITH T.ITEMCD IN (6011,
                             6012,
                             6021,
                             6051,
@@ -523,69 +529,69 @@ begin
                             601110,
                             601111,
                             660130)
-                        connect by
-                            prior t.itemcd = t.sprrcd
-                    )                    temp1
+                        CONNECT BY
+                            PRIOR T.ITEMCD = T.SPRRCD
+                    )                    TEMP1
  --根据科目拼上总账余额表
-                    left join sungl.gla_glis_h_t02 u
-                    on temp1.itemcd = u.itemcd
-                    and u.stacid = 1
-                    and u.geldtp = 'd'
+                    LEFT JOIN SUNGL.GLA_GLIS_H_T02 U
+                    ON TEMP1.ITEMCD = U.ITEMCD
+                    AND U.STACID = 1
+                    AND U.GELDTP = 'D'
             ),
  --step 开始根据科目维度汇总
-            temp3 as(
-                select
-                    root_id,
-                    root_name,
-                    sum(onlnbl)  onlnbl,
-                    sum(lastbl)  lastbl,
-                    sum(crtsam)  crtsam,
-                    sum(drtsam)  drtsam,
-                    sum(dlflcbl) dlflcbl,
-                    sum(clflcbl) clflcbl,
-                    brchcd,
-                    crcycd,
-                    acctdt,
-                    blncdn,
-                    systid
-                from
-                    temp2
-                group by
-                    brchcd,
-                    root_id,
-                    root_name,
-                    crcycd,
-                    acctdt,
-                    blncdn,
-                    systid
+            TEMP3 AS(
+                SELECT
+                    ROOT_ID,
+                    ROOT_NAME,
+                    SUM(ONLNBL)  ONLNBL,
+                    SUM(LASTBL)  LASTBL,
+                    SUM(CRTSAM)  CRTSAM,
+                    SUM(DRTSAM)  DRTSAM,
+                    SUM(DLFLCBL) DLFLCBL,
+                    SUM(CLFLCBL) CLFLCBL,
+                    BRCHCD,
+                    CRCYCD,
+                    ACCTDT,
+                    BLNCDN,
+                    SYSTID
+                FROM
+                    TEMP2
+                GROUP BY
+                    BRCHCD,
+                    ROOT_ID,
+                    ROOT_NAME,
+                    CRCYCD,
+                    ACCTDT,
+                    BLNCDN,
+                    SYSTID
             ),
-            temp5 as(
-                select
-                    temp4.root_id2,
-                    temp4.root_name2,
-                    temp3.root_id,
-                    temp3.root_name,
-                    temp3.onlnbl,
-                    temp3.lastbl,
-                    temp3.crtsam,
-                    temp3.drtsam,
-                    temp3.dlflcbl,
-                    temp3.clflcbl,
-                    temp3.crcycd,
-                    temp3.acctdt,
-                    temp3.blncdn,
-                    temp3.systid
-                from
+            TEMP5 AS(
+                SELECT
+                    TEMP4.ROOT_ID2,
+                    TEMP4.ROOT_NAME2,
+                    TEMP3.ROOT_ID,
+                    TEMP3.ROOT_NAME,
+                    TEMP3.ONLNBL,
+                    TEMP3.LASTBL,
+                    TEMP3.CRTSAM,
+                    TEMP3.DRTSAM,
+                    TEMP3.DLFLCBL,
+                    TEMP3.CLFLCBL,
+                    TEMP3.CRCYCD,
+                    TEMP3.ACCTDT,
+                    TEMP3.BLNCDN,
+                    TEMP3.SYSTID
+                FROM
                     ( --找出68家汇总机构所有的末级机构
-                        select
-                            b.brchcd,
-                            b.brchna,
-                            connect_by_root(b.brchcd) root_id2,
-                            connect_by_root(b.brchna) root_name2
-                        from
-                            sungl.com_brch b
-                        where
-                            b.detltg = '1' start with b.brchcd in (901070000,
+                        SELECT
+                            B.BRCHCD,
+                            B.BRCHNA,
+                            CONNECT_BY_ROOT(B.BRCHCD) ROOT_ID2,
+                            CONNECT_BY_ROOT(B.BRCHNA) ROOT_NAME2
+                        FROM
+                            SUNGL.COM_BRCH B
+                        WHERE
+                            B.DETLTG = '1' START WITH B.BRCHCD IN (901070000,
                             901080000,
                             901090000,
                             903060000,
@@ -653,104 +659,110 @@ begin
                             907090000,
                             908080000,
                             908100000)
-                        connect by
-                            prior b.brchcd = b.sprrcd
-                    )                    temp4
+                        CONNECT BY
+                            PRIOR B.BRCHCD = B.SPRRCD
+                    )                    TEMP4
  --拼上 已汇总到一级科目的数据
-                    left join temp3
-                    on temp3.brchcd = temp4.brchcd
+                    LEFT JOIN TEMP3
+                    ON TEMP3.BRCHCD = TEMP4.BRCHCD
             )
  --汇总末级机构，完成机构维度汇总
-                select
-                    root_id2     brchcd,
-                    root_name2   brchna,
-                    root_id      itemcd,
-                    root_name    itemna,
-                    crcycd,
-                    systid,
-                    acctdt,
-                    blncdn,
-                    sum(lastbl)  lastbl,
-                    sum(crtsam)  crtsam,
-                    sum(drtsam)  drtsam,
-                    sum(dlflcbl) dlflcbl,
-                    sum(clflcbl) clflcbl,
-                    sum(onlnbl)  onlnbl
-                from
-                    temp5
-                group by
-                    root_id2,
-                    root_name2,
-                    root_id,
-                    root_name,
-                    crcycd,
-                    acctdt,
-                    blncdn,
-                    systid
-            ) commit;
-end count_brch_item;
+                SELECT
+                    ROOT_ID2     BRCHCD,
+                    ROOT_NAME2   BRCHNA,
+                    ROOT_ID      ITEMCD,
+                    ROOT_NAME    ITEMNA,
+                    CRCYCD,
+                    SYSTID,
+                    ACCTDT,
+                    BLNCDN,
+                    SUM(LASTBL)  LASTBL,
+                    SUM(CRTSAM)  CRTSAM,
+                    SUM(DRTSAM)  DRTSAM,
+                    SUM(DLFLCBL) DLFLCBL,
+                    SUM(CLFLCBL) CLFLCBL,
+                    SUM(ONLNBL)  ONLNBL
+                FROM
+                    TEMP5
+                GROUP BY
+                    ROOT_ID2,
+                    ROOT_NAME2,
+                    ROOT_ID,
+                    ROOT_NAME,
+                    CRCYCD,
+                    ACCTDT,
+                    BLNCDN,
+                    SYSTID
+            ) COMMIT;
+END COUNT_BRCH_ITEM;
 -----------------------------***机构科目汇总结束***------------------------------------------
 /**
- * @description: 根据汇率进行折算，更新gla_glis_count的余额为本位币余额
+ * @description: 根据汇率进行折算，更新GLA_GLIS_COUNT的余额为本位币余额
  */
 
-procedure convert_to_rmb is
+PROCEDURE CONVERT_TO_RMB IS
 
-new_date varchar(10);
+NEW_DATE VARCHAR(10);
 
-begin
+BEGIN
  -- 关联汇率表，排序后取第一个值作为最新日期
-    select
-        efctdt into new_date
-    from
+    SELECT
+        EFCTDT INTO NEW_DATE
+    FROM
         (
-            select
-                rownum a,
-                efctdt
-            from
+            SELECT
+                ROWNUM A,
+                EFCTDT
+            FROM
                 (
-                    select
-                        distinct (t.efctdt)
- --rownum rn
-                    from
-                        sungl.com_exrt t
-                    order by
-                        t.efctdt desc
+                    SELECT
+                        DISTINCT (T.EFCTDT)
+ --ROWNUM RN
+                    FROM
+                        SUNGL.COM_EXRT T
+                    ORDER BY
+                        T.EFCTDT DESC
                 )
-            where
-                rownum <= 3
-            order by
-                a asc
+            WHERE
+                ROWNUM <= 3
+            ORDER BY
+                A ASC
         )
-    where
-        a = 1;
+    WHERE
+        A = 1;
  ---------------------------------------------------***折算开始***---------------------------------------------------------------------------
-    update sungl.gla_glis_count c
-    set
-            c.lastbl = c.lastbl * (select e.middpr from sungl.com_exrt e where e.efctdt = new_date and e.crcycd = c.crcycd),
-            c.crtsam = c.crtsam * (select e.middpr from sungl.com_exrt e where e.efctdt = new_date and e.crcycd = c.crcycd),
-            c.drtsam = c.drtsam * (select e.middpr from sungl.com_exrt e where e.efctdt = new_date and e.crcycd = c.crcycd),
-            c.onlnbl = c.onlnbl * (select e.middpr from sungl.com_exrt e where e.efctdt = new_date and e.crcycd = c.crcycd);
-    commit;
-end convert_to_rmb;
+    UPDATE SUNGL.GLA_GLIS_COUNT C
+    SET
+        (
+            C.LASTBL,
+            C.CRTSAM,
+            C.DRTSAM,
+            C.ONLNBL
+        ) = (
+            C.LASTBL * (SELECT E.MIDDPR FROM SUNGL.COM_EXRT E WHERE E.EFCTDT = NEW_DATE AND E.CRCYCD = C.CRCYCD),
+            C.CRTSAM * (SELECT E.MIDDPR FROM SUNGL.COM_EXRT E WHERE E.EFCTDT = NEW_DATE AND E.CRCYCD = C.CRCYCD),
+            C.DRTSAM * (SELECT E.MIDDPR FROM SUNGL.COM_EXRT E WHERE E.EFCTDT = NEW_DATE AND E.CRCYCD = C.CRCYCD),
+            C.ONLNBL * (SELECT E.MIDDPR FROM SUNGL.COM_EXRT E WHERE E.EFCTDT = NEW_DATE AND E.CRCYCD = C.CRCYCD)
+        );
+    COMMIT;
  --------------------------------------------------***折算结束***---------------------------------------------------------------------------
  /**
   * @description: 来源以及币种汇总
   */ 
  --------------------------------------------------***汇总来源以及币种开始***--------------------------------------------------------------------
-procedure count_crc_sys is
+PROCEDURE COUNT_CRC_SYS IS
 
-begin
+BEGIN
  /* 3开头的往来类科目双向都可能有余额,需要统一方向
  会计核算默认这类科目在借方，因此贷方余额统一转向  */
-    update sungl.gla_glis_count t
-    set
-        t.onlnbl = t.onlnbl * (
+    UPDATE SUNGL.GLA_GLIS_COUNT T
+    SET
+        T.ONLNBL = T.ONLNBL * (
             -1
         )
-    where
-        t.blncdn = 'c'
-        and t.itemcd in (
+    WHERE
+        T.BLNCDN = 'C'
+        AND T.ITEMCD IN (
             3001,
             3002,
             3051,
@@ -762,71 +774,79 @@ begin
             330108,
             33010899
         );
-    commit;
-insert into sungl.gla_glis_count2  select * from 
-(with temp1 as
- (select brchcd, --机构号
-         brchna, --机构名称
-         itemcd, --科目号
-         itemna, --科目名称
-         systid, --来源系统号
-         acctdt, --账务日期
-         sum(lastbl) lastbl,
-         sum(crtsam) crtsam,
-         sum(drtsam) drtsam,
-         sum(onlnbl) onlnbl --余额汇总值
-    from sungl.gla_glis_count
-   group by brchcd, brchna, itemcd, itemna, acctdt, systid),
-temp2 as
- (select temp1.acctdt,
-         temp1.brchcd,
-         temp1.brchna,
-         temp1.itemcd,
-         temp1.itemna,
-         sum(lastbl) lastbl,
-         sum(crtsam) crtsam,
-         sum(drtsam) drtsam,
-         sum(onlnbl) onlnbl
-    from temp1
-   group by temp1.acctdt, temp1.brchcd, temp1.brchna, temp1.itemcd, temp1.itemna) ,
-temp3 as
- (select temp2.acctdt,
-         temp2.brchcd,
-         temp2.brchna,
-         temp2.itemcd,
-         temp2.itemna,
-         sum(temp2.lastbl) lastbl,
-         sum(temp2.crtsam) crtsam,
-         sum(temp2.drtsam) drtsam,
-         sum(temp2.onlnbl) onlnbl
-  --b.onlnbl strnbl
-    from --#todo:gla_glis_st建表语句，然后余额字段要有默认值0
-         temp2
-   group by temp2.acctdt, temp2.brchcd, temp2.brchna, temp2.itemcd, temp2.itemna)  
-select temp3.acctdt,
-         temp3.brchcd,
-         temp3.brchna,
-         temp3.itemcd,
-         temp3.itemna,
-         temp3.lastbl,
-         temp3.crtsam,
-         temp3.drtsam,
-         temp3.onlnbl,
-         b.onlnbl strnbl
-    from temp3
-    left join sungl.gla_glis_st b
-  
-      on b.itemcd = temp3.itemcd
-     and b.brchcd = temp3.brchcd);
-    commit;
+    COMMIT;
+    INSERT INTO SUNGL.GLA_GLIS_COUNT2
+        SELECT
+            *
+        FROM
+            ( WITH TEMP1 AS(
+                SELECT
+                    BRCHCD, --机构号
+                    BRCHNA, --机构名称
+                    ITEMCD, --科目号
+                    ITEMNA, --科目名称
+                    SYSTID, --来源系统号
+                    ACCTDT, --账务日期
+                    SUM(LASTBL) LASTBL,
+                    SUM(CRTSAM) CRTSAM,
+                    SUM(DRTSAM) DRTSAM,
+                    SUM(ONLNBL) ONLNBL --余额汇总值
+                FROM
+                    SUNGL.GLA_GLIS_COUNT
+                GROUP BY
+                    BRCHCD,
+                    BRCHNA,
+                    ITEMCD,
+                    ITEMNA,
+                    ACCTDT,
+                    SYSTID
+            ),
+            TEMP2 AS(
+                SELECT
+                    TEMP1.ACCTDT,
+                    TEMP1.BRCHCD,
+                    TEMP1.BRCHNA,
+                    TEMP1.ITEMCD,
+                    TEMP1.ITEMNA,
+                    SUM(LASTBL) LASTBL,
+                    SUM(CRTSAM) CRTSAM,
+                    SUM(DRTSAM) DRTSAM,
+                    SUM(ONLNBL) ONLNBL
+                FROM
+                    TEMP1
+                GROUP BY
+                    TEMP1.ACCTDT,
+                    TEMP1.BRCHCD,
+                    TEMP1.BRCHNA,
+                    TEMP1.ITEMCD,
+                    TEMP1.ITEMNA
+            )
+                SELECT
+                    TEMP2.ACCTDT,
+                    TEMP2.BRCHCD,
+                    TEMP2.BRCHNA,
+                    TEMP2.ITEMCD,
+                    TEMP2.ITEMNA,
+                    SUM(TEMP2.LASTBL) LASTBL,
+                    SUM(TEMP2.CRTSAM) CRTSAM,
+                    SUM(TEMP2.DRTSAM) DRTSAM,
+                    SUM(TEMP2.ONLNBL) ONLNBL,
+                    B.ONLNBL STRNBL
+                FROM --#TODO:GLA_GLIS_ST建表语句，然后余额字段要有默认值0
+                    TEMP2 C
+                    LEFT JION SUNGL.GLA_GLIS_ST B
+                    ON B.ITEMCD = TEMP2.ITEMCD
+                    AND B.BRCHCD = TEMP2.BRCHCD
+            );
+    COMMIT;
  --双向科目取绝对值作为余额
-    update sungl.gla_glis_count2 t
-    set
-        t.onlnbl = abs(
-            t.onlnbl
+    UPDATE SUNGL.GLA_GLIS_COUNT2 T
+    SET
+        T.ONLNBL = ABS(
+            T.ONLNBL
         )
-    where
-        t.itemcd in(
+    WHERE
+        T.ITEMCD IN(
             3001,
             3002,
             3051,
@@ -838,24 +858,24 @@ select temp3.acctdt,
             330108,
             33010899
         );
-    commit;
-end count_crc_sys;
+    COMMIT;
+END COUNT_CRC_SYS;
  --------------------------------------------------***汇总来源以及币种结束***--------------------------------------------------------------------
-procedure update_onlnbl is
+PROCEDURE UPDATE_ONLNBL IS
 
-begin
+BEGIN
  ---------------------------------------------------***资产负债类余额更新开始***-------------------------------------------------
 
  /* 资产负债类的科目，通过余额折算的方式完成，即当前余额 * 汇率
 或者通过 （上期余额 + 发生额） * 汇率均可 */
  --资产负债类方向是贷方的科目加工
-    update sungl.gla_glis_count2 c
-    set
-        c.onlnbl = (
-            c.lastbl + c.crtsam -c.drtsam
+    UPDATE SUNGL.GLA_GLIS_COUNT2 C
+    SET
+        C.ONLNBL = (
+            C.LASTBL + C.CRTSAM -C.DRTSAM
         )
-    where
-        c.itemcd in (
+    WHERE
+        C.ITEMCD IN (
             1112,
             1512,
             1522,
@@ -916,15 +936,15 @@ begin
             4103,
             4104
         );
-    commit;
+    COMMIT;
  --资产负债类方向是借方的科目加工
-    update sungl.gla_glis_count2 c
-    set
-        c.onlnbl = (
-            c.lastbl + c.drtsam -c.crtsam
+    UPDATE SUNGL.GLA_GLIS_COUNT2 C
+    SET
+        C.ONLNBL = (
+            C.LASTBL + C.DRTSAM -C.CRTSAM
         )
-    where
-        c.itemcd in (
+    WHERE
+        C.ITEMCD IN (
             1111,
             1124,
             1131,
@@ -992,17 +1012,17 @@ begin
             4004,
             13070101
         );
-    commit;
+    COMMIT;
  -----------------------------------------***资产负债类余额更新完毕***-------------------------------------------------------------
  -------------------------------------------***损益类余额更新开始***---------------------------------------------------------------
  --6411利息支出特殊计算公式(借方)
-    update gla_glis_count2 c
-    set
-        c.onlnbl = c.strnbl + (
-            c.drtsam -c.crtsam
+    UPDATE GLA_GLIS_COUNT2 C
+    SET
+        C.ONLNBL = C.STRNBL + (
+            C.DRTSAM -C.CRTSAM
         )
-    where
-        c.itemcd in (
+    WHERE
+        C.ITEMCD IN (
             6421,
             6601,
             660101,
@@ -1018,205 +1038,192 @@ begin
             6801,
             6901
         );
-    commit;
+    COMMIT;
  --6411利息支出特殊计算公式(贷方)
-    update sungl.gla_glis_count2 c
-       set c.onlnbl =
-            (c.strnbl + (c.crtsam - c.drtsam))
-     where c.itemcd in (6011,
-                        601110,
-                        601111,
-                        6012,
-                        6021,
-                        6051,
-                        6061,
-                        6071,
-                        6101,
-                        6111,
-                        6115,
-                        4005,
-                        6301);
-    commit;
+    UPDATE GLA_GLIS_COUNT2 C
+    SET
+        C.ONLNBL =(
+            C.STRNBL + ( C.CRTSAM -C.DRTSAM ) WHERE C.ITEMCD IN ( 6011, 601110, 601111, 6012, 6021, 6051, 6061, 6071, 6101, 6111, 6115, 4005, 6301 );
+            COMMIT;
  -------------------------------------------***损益类折算结束***---------------------------------------------------------------
-insert into sungl.data_rj_base
-    select
-        t.acctdt,
-        t.brchcd,
-        t.brchna,
-        t.itemcd,
-        t.itemna,
-        t.onlnbl
-    from
-        sungl.gla_glis_count2 t;
-end update_onlnbl;
+INSERT INTO SUNGL.DATA_RJ_BASE
+    SELECT
+        T.ACCTDT,
+        T.BRCHCD,
+        T.BRCHNA,
+        T.ITEMCD,
+        T.ITEMNA,
+        T.ONLNBL
+    FROM
+        SUNGL.GLA_GLIS_COUNT2 T;
+END UPDATE_ONLNBL;
 
 /**
  * @description: 加工指标，插入结果表
  */
  -------------------------------------------***指标加工开始***---------------------------------------------------------------
-procedure insert_data_dapin_result is
+PROCEDURE INSERT_DATA_DAPIN_RESULT IS
 
 --机构循环取数，插入结果表
-i_col number;
+I_COL NUMBER;
 
-type num_list is varray(68) of number;
+TYPE NUM_LIST IS VARRAY(68) OF NUMBER;
 
-var_array num_list := num_list(901070000, 901080000, 901090000, 903060000, 903070000, 904020000, 904060000, 905030000, 905090000, 908050000, 909020000, 901020000, 901040000, 901060000, 906100000, 908040000, 908070000, 909060000, 901100000, 903020000, 905100000, 906030000, 908020000, 908030000, 909030000, 903050000, 903090000, 906080000, 908090000, 908110000, 909040000, 901030000, 903040000, 903110000, 903120000, 905020000, 905110000, 906070000, 907100000, 908060000, 909080000, 902010000, 905050000, 905070000, 905080000, 906020000, 906060000, 907030000, 910000000, 901050000, 903030000, 903100000, 905040000, 905060000, 906040000, 906050000, 907070000, 907110000, 909050000, 909070000, 903080000, 906090000, 907020000, 907040000, 907060000, 907090000, 908080000, 908100000);
+VAR_ARRAY NUM_LIST := NUM_LIST(901070000, 901080000, 901090000, 903060000, 903070000, 904020000, 904060000, 905030000, 905090000, 908050000, 909020000, 901020000, 901040000, 901060000, 906100000, 908040000, 908070000, 909060000, 901100000, 903020000, 905100000, 906030000, 908020000, 908030000, 909030000, 903050000, 903090000, 906080000, 908090000, 908110000, 909040000, 901030000, 903040000, 903110000, 903120000, 905020000, 905110000, 906070000, 907100000, 908060000, 909080000, 902010000, 905050000, 905070000, 905080000, 906020000, 906060000, 907030000, 910000000, 901050000, 903030000, 903100000, 905040000, 905060000, 906040000, 906050000, 907070000, 907110000, 909050000, 909070000, 903080000, 906090000, 907020000, 907040000, 907060000, 907090000, 908080000, 908100000);
 
-begin
-  select distinct (t.acctdt) into acct_date from sungl.gla_glis_h_t02 t order by t.acctdt;
-    for i in 1 .. var_array.count loop
-        i_col := var_array(i);
-        insert into sungl.data_dapin_reslt values (
-            acct_date, --#fixme:加上日期参数
-            i_col,
-            sungl.pkg_item_count_zcfz.turnbrchcd(i_col),
-            sungl.pkg_item_count_tool.totalrev(i_col),
-            sungl.pkg_item_count_tool.item6011(i_col),
-            sungl.pkg_item_count_tool.item6012(i_col),
-            sungl.pkg_item_count_tool.item6021(i_col),
-            sungl.pkg_item_count_tool.otherrev(i_col),
-            sungl.pkg_item_count_tool.totalexp(i_col),
-            sungl.pkg_item_count_tool.item6411(i_col),
-            sungl.pkg_item_count_tool.item6412(i_col),
-            sungl.pkg_item_count_tool.item6421(i_col),
-            sungl.pkg_item_count_tool.item6601(i_col),
-            sungl.pkg_item_count_tool.item660101(i_col),
-            sungl.pkg_item_count_tool.item66010501(i_col),
-            sungl.pkg_item_count_tool.item660130(i_col),
-            sungl.pkg_item_count_tool.item6602(i_col),
-            sungl.pkg_item_count_tool.item6711(i_col),
-            sungl.pkg_item_count_tool.item6403(i_col),
-            sungl.pkg_item_count_tool.item6061(i_col),
-            sungl.pkg_item_count_tool.item6101(i_col),
-            sungl.pkg_item_count_tool.item6111(i_col),
-            sungl.pkg_item_count_tool.item6701(i_col),
-            sungl.pkg_item_count_tool.item6702(i_col),
-            sungl.pkg_item_count_tool.totalprof(i_col),
-            sungl.pkg_item_count_tool.item6801(i_col),
-            sungl.pkg_item_count_tool.netprof(i_col),
-            sungl.pkg_item_count_zcfz.totaldep(i_col),
-            sungl.pkg_item_count_zcfz.totalassets(i_col),
-            sungl.pkg_item_count_zcfz.totalassets2(i_col),
-            sungl.pkg_item_count_zcfz.totalloans(i_col),
-            sungl.pkg_item_count_zcfz.ownsequity(i_col),
-            sungl.pkg_item_count_zcfz.loandecpre(i_col),
+BEGIN
+    FOR I IN 1 .. VAR_ARRAY.COUNT LOOP
+        I_COL := VAR_ARRAY(I);
+        INSERT INTO SUNGL.DATA_DAPIN_RESLT VALUES (
+            20221101, --#FIXME:加上日期参数
+            I_COL,
+            SUNGL.PKG_ITEM_COUNT_ZCFZ.TURNBRCHCD(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.TOTALREV(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM6011(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM6012(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM6021(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.OTHERREV(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.TOTALEXP(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM6411(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM6412(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM6421(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM6601(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM660101(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM66010501(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM660130(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM6602(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM6711(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM6403(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM6061(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM6101(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM6111(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM6701(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM6702(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.TOTALPROF(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM6801(I_COL),
+            SUNGL.PKG_ITEM_COUNT_TOOL.NETPROF(I_COL),
+            SUNGL.PKG_ITEM_COUNT_ZCFZ.TOTALDEP(I_COL),
+            SUNGL.PKG_ITEM_COUNT_ZCFZ.TOTALASSETS(I_COL),
+            SUNGL.PKG_ITEM_COUNT_ZCFZ.TOTALASSETS2(I_COL),
+            SUNGL.PKG_ITEM_COUNT_ZCFZ.TOTALLOANS(I_COL),
+            SUNGL.PKG_ITEM_COUNT_ZCFZ.OWNSEQUITY(I_COL),
+            SUNGL.PKG_ITEM_COUNT_ZCFZ.LOANDECPRE(I_COL),
             0,
             0,
             0,
-            concat(to_char(sungl.pkg_item_count_bili.roe(i_col) * 100, 'fm990.99'), '%'),
+            0,
  --!成本收入比需要转换成百分比
-            concat(to_char(sungl.pkg_item_count_bili.costinco(i_col) * 100, 'fm990.99'), '%'),
+            CONCAT(TO_CHAR(SUNGL.PKG_ITEM_COUNT_BILI.COSTINCO(I_COL) * 100, 'FM990.99'), '%'),
             0,
-            sungl.pkg_item_count_tool.item6301(i_col)
+            SUNGL.PKG_ITEM_COUNT_TOOL.ITEM6301(I_COL)
         );
-    end loop;
-    commit;
-end insert_data_dapin_result;
+    END LOOP;
+    COMMIT;
+END INSERT_DATA_DAPIN_RESULT;
  -------------------------------------------***指标结束***---------------------------------------------------------------
- -------------------------------------------***csv文件生成工具***---------------------------------------------------------------
-procedure sql_to_csv( p_query in varchar2, -- plsql文
-p_dir in varchar2, -- 导出的文件放置目录
-p_filename in varchar2 -- csv名
-) is l_output utl_file.file_type;
+ -------------------------------------------***CSV文件生成工具***---------------------------------------------------------------
+PROCEDURE SQL_TO_CSV( P_QUERY IN VARCHAR2, -- PLSQL文
+P_DIR IN VARCHAR2, -- 导出的文件放置目录
+P_FILENAME IN VARCHAR2 -- CSV名
+) IS L_OUTPUT UTL_FILE.FILE_TYPE;
 
-l_thecursor integer default dbms_sql.open_cursor;
-l_columnvalue varchar2(4000);
-l_status integer;
-l_colcnt number := 0;
-l_separator varchar2(1);
-l_desctbl dbms_sql.desc_tab;
-p_max_linesize number := 32000;
+L_THECURSOR INTEGER DEFAULT DBMS_SQL.OPEN_CURSOR;
+L_COLUMNVALUE VARCHAR2(4000);
+L_STATUS INTEGER;
+L_COLCNT NUMBER := 0;
+L_SEPARATOR VARCHAR2(1);
+L_DESCTBL DBMS_SQL.DESC_TAB;
+P_MAX_LINESIZE NUMBER := 32000;
 
-begin
- --open file
-    l_output := utl_file.fopen(p_dir, p_filename, 'w', p_max_linesize);
- --define date format
-    execute immediate 'alter session set nls_date_format=''yyyy-mm-dd hh24:mi:ss''';
- --open cursor
-    dbms_sql.parse(l_thecursor, p_query, dbms_sql.native);
-    dbms_sql.describe_columns(l_thecursor, l_colcnt, l_desctbl);
- --dump table column name
-    for i in 1 .. l_colcnt loop
-        utl_file.put(l_output, l_separator
+BEGIN
+ --OPEN FILE
+    L_OUTPUT := UTL_FILE.FOPEN(P_DIR, P_FILENAME, 'W', P_MAX_LINESIZE);
+ --DEFINE DATE FORMAT
+    EXECUTE IMMEDIATE 'ALTER SESSION SET NLS_DATE_FORMAT=''YYYY-MM-DD HH24:MI:SS''';
+ --OPEN CURSOR
+    DBMS_SQL.PARSE(L_THECURSOR, P_QUERY, DBMS_SQL.NATIVE);
+    DBMS_SQL.DESCRIBE_COLUMNS(L_THECURSOR, L_COLCNT, L_DESCTBL);
+ --DUMP TABLE COLUMN NAME
+    FOR I IN 1 .. L_COLCNT LOOP
+        UTL_FILE.PUT(L_OUTPUT, L_SEPARATOR
             || ''
-            || l_desctbl(i).col_name
+            || L_DESCTBL(I).COL_NAME
             || ''); --输出表字段
-        dbms_sql.define_column(l_thecursor, i, l_columnvalue, 4000);
-        l_separator := ',';
-    end loop;
-    utl_file.new_line(l_output); --输出表字段
- --execute the query statement
-    l_status := dbms_sql.execute(l_thecursor);
- --dump table column value
-    while (dbms_sql.fetch_rows(l_thecursor) > 0) loop
-        l_separator := '';
-        for i in 1 .. l_colcnt loop
-            dbms_sql.column_value(l_thecursor, i, l_columnvalue);
-            utl_file.put(l_output, l_separator
+        DBMS_SQL.DEFINE_COLUMN(L_THECURSOR, I, L_COLUMNVALUE, 4000);
+        L_SEPARATOR := ',';
+    END LOOP;
+    UTL_FILE.NEW_LINE(L_OUTPUT); --输出表字段
+ --EXECUTE THE QUERY STATEMENT
+    L_STATUS := DBMS_SQL.EXECUTE(L_THECURSOR);
+ --DUMP TABLE COLUMN VALUE
+    WHILE (DBMS_SQL.FETCH_ROWS(L_THECURSOR) > 0) LOOP
+        L_SEPARATOR := '';
+        FOR I IN 1 .. L_COLCNT LOOP
+            DBMS_SQL.COLUMN_VALUE(L_THECURSOR, I, L_COLUMNVALUE);
+            UTL_FILE.PUT(L_OUTPUT, L_SEPARATOR
                 || ''
-                || trim(both ' ' from replace(l_columnvalue, '"', '""'))
+                || TRIM(BOTH ' ' FROM REPLACE(L_COLUMNVALUE, '"', '""'))
                 || '');
-            l_separator := ',';
-        end loop;
-        utl_file.new_line(l_output);
-    end loop;
- --close cursor
-    dbms_sql.close_cursor(l_thecursor);
- --close file
-    utl_file.fclose(l_output);
-exception
-    when others then
-        raise;
-end sql_to_csv;
- -------------------------------------------***csv文件生成工具***---------------------------------------------------------------
- -------------------------------------------***ftp调用工具***---------------------------------------------------------------
+            L_SEPARATOR := ',';
+        END LOOP;
+        UTL_FILE.NEW_LINE(L_OUTPUT);
+    END LOOP;
+ --CLOSE CURSOR
+    DBMS_SQL.CLOSE_CURSOR(L_THECURSOR);
+ --CLOSE FILE
+    UTL_FILE.FCLOSE(L_OUTPUT);
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE;
+END SQL_TO_CSV;
+ -------------------------------------------***CSV文件生成工具***---------------------------------------------------------------
+ -------------------------------------------***FTP调用工具***---------------------------------------------------------------
 
-procedure ftp_to_dapin is 
-l_conn utl_tcp.connection; --定义一个连接类型
-r_put_file varchar2(255);
-l_blob_len integer;
-p_reason varchar2(2555) := null; --定义报错信息，默认为null
-v_result varchar2(255) := 0; --定义结果信息
-v_sign number(4) := 0; --定义结果状态，默认为0
+PROCEDURE FTP_TO_DAPIN IS 
+L_CONN UTL_TCP.CONNECTION; --定义一个连接类型
+R_PUT_FILE VARCHAR2(255);
+L_BLOB_LEN INTEGER;
+P_REASON VARCHAR2(2555) := NULL; --定义报错信息，默认为NULL
+V_RESULT VARCHAR2(255) := 0; --定义结果信息
+V_SIGN NUMBER(4) := 0; --定义结果状态，默认为0
 
-begin
- --使用ftp.login方法创建连接，参数依次为ip/端口/用户名/密码 #todo:生产上的地址记得配置
-    l_conn := sungl.ftp.login('192.111.29.94', '21', 'ftpusr', 'ftp@123..');
-    begin
+BEGIN
+ --使用FTP.LOGIN方法创建连接，参数依次为IP/端口/用户名/密码 #TODO:生产上的地址记得配置
+    L_CONN := SUNGL.FTP.LOGIN('192.111.29.94', '21', 'ftpusr', 'Ftp@123..');
+    BEGIN
  --获取远程文件绝对路径
-        r_put_file := 'uacp_dapin_data_'
-            ||to_char(sysdate, 'yyyymmdd')
+        R_PUT_FILE := 'uacp_DAPIN_DATA_'
+            ||TO_CHAR(SYSDATE, 'YYYYMMDD')
             ||'.csv';
  --获取指定文件字节大小
- --l_blob_len := dbms_lob.getlength(ftp.get_remote_binary_data(l_conn,r_from_file));
- --使用ftp.get下载文件
-        sungl.ftp.put(
-            p_conn => l_conn, --传入连接
-            p_from_dir => 'out_path', --件绝对路径
-            p_from_file => r_put_file, ---传入oracle服务器的目录，需确保dba_directories表下存在
-            p_to_file => r_put_file
-        ); --生成的文件名 #fixme:生成的文件加上日期参数
+ --L_BLOB_LEN := DBMS_LOB.GETLENGTH(FTP.GET_REMOTE_BINARY_DATA(L_CONN,R_FROM_FILE));
+ --使用FTP.GET下载文件
+        SUNGL.FTP.PUT(
+            P_CONN => L_CONN, --传入连接
+            P_FROM_DIR => 'OUT_PATH', --件绝对路径
+            P_FROM_FILE => R_PUT_FILE, ---传入ORACLE服务器的目录，需确保DBA_DIRECTORIES表下存在
+            P_TO_FILE => R_PUT_FILE
+        ); --生成的文件名 #FIXME:生成的文件加上日期参数
  --判断文件是否为空，如果为空返回失败
-        if l_blob_len = 0 then
-            v_sign := 1;
-            v_result := '失败';
-        else
-            v_result := '成功';
-        end if;
+        IF L_BLOB_LEN = 0 THEN
+            V_SIGN := 1;
+            V_RESULT := '失败';
+        ELSE
+            V_RESULT := '成功';
+        END IF;
  --获取异常
-    exception
-        when others then
- --dbms_utility.format_error_backtrace方法用于获取报错的行数，sqlerrm用于获取报错信息
-            p_reason := dbms_utility.format_error_backtrace
-                || sqlerrm;
-            v_sign := 1;
-            v_result := '失败';
-            end;
-        ftp.logout(l_conn); --关闭fpt连接
-        utl_tcp.close_all_connections; --关闭tcp连接
- --insert into gsc_test values(v_sign, v_result || '，数据大小为：' ||l_blob_len, p_reason);
- --commit;
-    end ftp_to_dapin;
-end pkg_item_count_fac;
- -------------------------------------------***ftp调用工具***---------------------------------------------------------------
+    EXCEPTION
+        WHEN OTHERS THEN
+ --DBMS_UTILITY.FORMAT_ERROR_BACKTRACE方法用于获取报错的行数，SQLERRM用于获取报错信息
+            P_REASON := DBMS_UTILITY.FORMAT_ERROR_BACKTRACE
+                || SQLERRM;
+            V_SIGN := 1;
+            V_RESULT := '失败';
+            END;
+        FTP.LOGOUT(L_CONN); --关闭FPT连接
+        UTL_TCP.CLOSE_ALL_CONNECTIONS; --关闭TCP连接
+ --INSERT INTO GSC_TEST VALUES(V_SIGN, V_RESULT || '，数据大小为：' ||L_BLOB_LEN, P_REASON);
+ --COMMIT;
+    END FTP_TO_DAPIN;
+END PKG_ITEM_COUNT_FAC;
+ -------------------------------------------***FTP调用工具***---------------------------------------------------------------

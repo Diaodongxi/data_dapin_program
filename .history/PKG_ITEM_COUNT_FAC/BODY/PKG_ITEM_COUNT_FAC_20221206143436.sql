@@ -1,6 +1,4 @@
 create or replace package body pkg_item_count_fac is
-
-acct_date varchar2(20);
  /**
  * @description: 固定科目价税分离
  */
@@ -8,7 +6,6 @@ acct_date varchar2(20);
 procedure tax_count is
 
 begin
-  select distinct (t.acctdt) into acct_date from sungl.gla_glis_h_t02 t order by t.acctdt;
  /* 
 税率表是财务部提供的，两张不同的税率表，包含普通机构和特殊机构
 计税要从末级数据计，且只有核心来源的部分科目才需要计税
@@ -22,7 +19,7 @@ begin
 
     where
         t.systid = '30101'
-        and t.acctdt = acct_date
+        and t.acctdt = 20221101
         and t.brchcd in (
             select b.brchcd from sungl.com_brch b where b.detltg = '1' start with b.brchcd in (901020000, 901060000, 902010000, 903020000, 904020000, 905020000, 906020000, 907020000, 908020000, 909020000) connect by prior b.brchcd = b.sprrcd
         )
@@ -174,7 +171,7 @@ begin
         t.drtsam = t.drtsam / (1+(select e.taxrate from sungl.tax_rate_nm e where t.itemcd = e.itemcd))
     where
         t.systid = '30101'
-        and t.acctdt = acct_date
+        and t.acctdt = 20221101
         and t.itemcd in (
             6011888,
             601107,
@@ -814,8 +811,8 @@ select temp3.acctdt,
          temp3.onlnbl,
          b.onlnbl strnbl
     from temp3
+    
     left join sungl.gla_glis_st b
-  
       on b.itemcd = temp3.itemcd
      and b.brchcd = temp3.brchcd);
     commit;
@@ -1064,11 +1061,10 @@ type num_list is varray(68) of number;
 var_array num_list := num_list(901070000, 901080000, 901090000, 903060000, 903070000, 904020000, 904060000, 905030000, 905090000, 908050000, 909020000, 901020000, 901040000, 901060000, 906100000, 908040000, 908070000, 909060000, 901100000, 903020000, 905100000, 906030000, 908020000, 908030000, 909030000, 903050000, 903090000, 906080000, 908090000, 908110000, 909040000, 901030000, 903040000, 903110000, 903120000, 905020000, 905110000, 906070000, 907100000, 908060000, 909080000, 902010000, 905050000, 905070000, 905080000, 906020000, 906060000, 907030000, 910000000, 901050000, 903030000, 903100000, 905040000, 905060000, 906040000, 906050000, 907070000, 907110000, 909050000, 909070000, 903080000, 906090000, 907020000, 907040000, 907060000, 907090000, 908080000, 908100000);
 
 begin
-  select distinct (t.acctdt) into acct_date from sungl.gla_glis_h_t02 t order by t.acctdt;
     for i in 1 .. var_array.count loop
         i_col := var_array(i);
         insert into sungl.data_dapin_reslt values (
-            acct_date, --#fixme:加上日期参数
+            20221101, --#fixme:加上日期参数
             i_col,
             sungl.pkg_item_count_zcfz.turnbrchcd(i_col),
             sungl.pkg_item_count_tool.totalrev(i_col),
